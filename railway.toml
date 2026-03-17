@@ -1,6 +1,5 @@
 [deploy]
 startCommand = "node server.js"
- 
+
 [[services]]
-port = 4000
- 
+port = 8080
