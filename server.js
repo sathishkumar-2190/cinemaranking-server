@@ -48,7 +48,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🎬 CinemaRanking server running on http://localhost:${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/api/health\n`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`\n🎬 CinemaRanking server running on port ${PORT}`);
+  console.log(`   Health: /api/health\n`);
 });
