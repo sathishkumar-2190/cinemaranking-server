@@ -14,7 +14,7 @@ import watchlistRoutes from "./routes/watchlist.js";
 import authRoutes      from "./routes/auth.js";
 
 const app  = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 
 /* ── MIDDLEWARE ────────────────────────────── */
 app.use(cors({
@@ -48,7 +48,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
+
+
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n🎬 CinemaRanking server running on port ${PORT}`);
-  console.log(`   Health: /api/health\n`);
+  console.log(`🎬 CinemaRanking server running on port ${PORT}`);
+  console.log(`   Health: /api/health`);
 });
