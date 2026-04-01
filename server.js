@@ -71,6 +71,14 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`   Health: /api/health`);
 });
 
+// Keep Railway from sleeping — pings itself every 14 minutes
+if (process.env.NODE_ENV !== "development") {
+  setInterval(() => {
+    fetch("https://cinemaranking-server-production.up.railway.app/api/health")
+      .catch(() => {});
+  }, 14 * 60 * 1000);
+}
+
 // Add this before app.listen — keeps Railway from sleeping
 if (process.env.NODE_ENV === "production") {
   setInterval(() => {
