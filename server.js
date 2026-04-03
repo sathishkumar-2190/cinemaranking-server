@@ -9,31 +9,29 @@ import authRoutes      from "./routes/auth.js";
 const app  = express();
 const PORT = process.env.PORT || 8080;
 
-/* ── CORS ── allows all Vercel preview URLs + production */
+/* ── CORS ── */
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
+    // Allow requests with no origin (mobile, curl, Postman)
     if (!origin) return callback(null, true);
 
     const allowed = [
       // Local development
       "http://localhost:5173",
       "http://localhost:4000",
-      // All Vercel deployments for this project
+      // All Vercel deployments for cinemaranking
       /https:\/\/cinemaranking.*\.vercel\.app$/,
+      // Custom domain if you add one later
     ];
 
-    const isAllowed = allowed.some(pattern =>
-      typeof pattern === "string"
-        ? pattern === origin
-        : pattern.test(origin)
+    const isAllowed = allowed.some(p =>
+      typeof p === "string" ? p === origin : p.test(origin)
     );
 
-    if (isAllowed) {
-      callback(null, true);
-    } else {
+    if (isAllowed) callback(null, true);
+    else {
       console.warn(`CORS blocked: ${origin}`);
-      callback(new Error(`CORS not allowed for origin: ${origin}`));
+      callback(new Error(`CORS not allowed: ${origin}`));
     }
   },
   credentials: true,
@@ -48,12 +46,16 @@ app.use("/api/auth",      authRoutes);
 
 /* ── HEALTH CHECK ── */
 app.get("/api/health", (req, res) => {
-  res.json({
-    status:  "ok",
-    server:  "CinemaRanking API",
-    time:    new Date().toISOString(),
-  });
+  res.json({ status: "ok", server: "CinemaRanking API", time: new Date().toISOString() });
 });
+
+/* ── KEEP ALIVE (prevents Railway sleep) ── */
+if (process.env.NODE_ENV !== "development") {
+  setInterval(() => {
+    fetch(`https://cinemaranking-server-production.up.railway.app/api/health`)
+      .catch(() => {});
+  }, 14 * 60 * 1000);
+}
 
 /* ── 404 ── */
 app.use((req, res) => {
@@ -70,19 +72,3 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`🎬 CinemaRanking server running on port ${PORT}`);
   console.log(`   Health: /api/health`);
 });
-
-// Keep Railway from sleeping — pings itself every 14 minutes
-if (process.env.NODE_ENV !== "development") {
-  setInterval(() => {
-    fetch("https://cinemaranking-server-production.up.railway.app/api/health")
-      .catch(() => {});
-  }, 14 * 60 * 1000);
-}
-
-// Add this before app.listen — keeps Railway from sleeping
-if (process.env.NODE_ENV === "production") {
-  setInterval(() => {
-    fetch(`https://cinemaranking-server-production.up.railway.app/api/health`)
-      .catch(() => {});
-  }, 14 * 60 * 1000); // ping every 14 minutes
-}
